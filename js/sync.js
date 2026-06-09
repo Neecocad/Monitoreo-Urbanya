@@ -64,8 +64,13 @@ export async function sincronizar(onProgress) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
       body,
     });
-    const data = await resp.json();
-    if (data.status !== 'ok') throw new Error(data.mensaje || 'Error del servidor');
+    let data;
+    try {
+      data = await resp.json();
+    } catch (_) {
+      throw new Error('Respuesta no válida (¿la implementación es "Cualquier persona"?)');
+    }
+    if (data.status !== 'ok') throw new Error(data.mensaje || data.error || 'Error del servidor');
     reg.sincronizado = 1;
     await DB.updateRegistro(reg);
     enviados++;
