@@ -29,6 +29,12 @@
 
         <fieldset>
           <legend>Identificación</legend>
+          <label>Evaluador(a)
+            <select id="evaluador" required></select>
+          </label>
+          <label id="evaluador-otro-wrap" class="hidden">Iniciales (ej. Juan Pérez = JP)
+            <input type="text" id="evaluador-otro" maxlength="6" placeholder="JP" style="text-transform:uppercase" />
+          </label>
           <div class="grid-2">
             <label>Zona
               <input type="number" id="zona" min="1" inputmode="numeric" required />

@@ -21,6 +21,15 @@ export const ESPECIES_BASE = [
   { nombre: 'Desconocido (nn)', cientifico: '', origen: 'desconocido' },
 ];
 
+// Evaluadores(as) que realizan el censo. "Otro" habilita ingreso de iniciales.
+export const EVALUADORES = [
+  'Barbara Aros',
+  'Sabina Madariaga',
+  'Maria Paz Arroyo',
+  'Marcela Lizama',
+  'Nicolás Calderon',
+];
+
 // Parámetros del formulario (orden = orden de captura).
 export const ALTURA = [
   { code: 1, label: '< 1 m' },

@@ -4,9 +4,11 @@ import { latLonToUTM } from './utm.js';
 import * as XP from './export.js';
 import * as SYNC from './sync.js';
 import {
-  ESPECIES_BASE, ALTURA, DAP, SOBREVIVENCIA, VITALIDAD,
+  ESPECIES_BASE, EVALUADORES, ALTURA, DAP, SOBREVIVENCIA, VITALIDAD,
   FITOSANITARIO, HERBIVORIA, PODA, CORTA, ORIGENES,
 } from './catalog.js';
+
+const EVAL_KEY = 'urbanya-evaluador';
 
 const $ = (id) => document.getElementById(id);
 const estado = { especies: [], foto: null, gps: null, segValues: {} };
@@ -74,6 +76,42 @@ function actualizarOrigen() {
   $('origen-label').textContent = opt && opt.dataset.origen ? ORIGENES[opt.dataset.origen] : '—';
 }
 
+// ---------- Evaluador(a) ----------
+function cargarEvaluadores() {
+  const sel = $('evaluador');
+  sel.innerHTML = '<option value="" disabled selected>— Seleccionar —</option>';
+  EVALUADORES.forEach((n) => {
+    const o = document.createElement('option');
+    o.value = n; o.textContent = n;
+    sel.appendChild(o);
+  });
+  const otro = document.createElement('option');
+  otro.value = 'Otro'; otro.textContent = 'Otro (iniciales)';
+  sel.appendChild(otro);
+}
+
+function toggleEvaluadorOtro() {
+  $('evaluador-otro-wrap').classList.toggle('hidden', $('evaluador').value !== 'Otro');
+}
+
+// Restaura el último evaluador usado (mismo censista en muchos árboles).
+function restaurarEvaluador() {
+  const guardado = JSON.parse(localStorage.getItem(EVAL_KEY) || '{}');
+  if (guardado.sel) {
+    $('evaluador').value = guardado.sel;
+    if (guardado.sel === 'Otro') $('evaluador-otro').value = guardado.otro || '';
+  }
+  toggleEvaluadorOtro();
+}
+
+// Devuelve el nombre o las iniciales (si es "Otro"); '' si falta.
+function valorEvaluador() {
+  const sel = $('evaluador').value;
+  if (!sel) return '';
+  if (sel === 'Otro') return $('evaluador-otro').value.trim().toUpperCase();
+  return sel;
+}
+
 // ---------- GPS ----------
 function capturarGPS() {
   if (!navigator.geolocation) { toast('GPS no disponible'); return; }
@@ -120,6 +158,8 @@ function tomarFoto(file) {
       const ind = $('individuo').value || '?';
       const esp = $('especie').value || '';
       lineas.push(`Zona ${z} · Individuo ${ind}${esp ? ' · ' + esp : ''}`);
+      const ev = valorEvaluador();
+      if (ev) lineas.push(`Evaluador(a): ${ev}`);
       if (estado.gps) {
         lineas.push(`UTM ${estado.gps.huso}: ${estado.gps.x} E, ${estado.gps.y} N`);
         lineas.push(`Lat ${estado.gps.lat.toFixed(6)}, Lon ${estado.gps.lon.toFixed(6)}`);
@@ -150,12 +190,20 @@ function tomarFoto(file) {
 // ---------- Guardar ----------
 async function guardar(e) {
   e.preventDefault();
+  const evaluador = valorEvaluador();
+  if (!evaluador) { toast('Indica el/la evaluador(a)'); return; }
   const zona = $('zona').value;
   if (!zona) { toast('Indica la zona'); return; }
   if (!$('especie').value) { toast('Selecciona la especie'); return; }
 
+  // Recuerda el evaluador para el siguiente individuo.
+  localStorage.setItem(EVAL_KEY, JSON.stringify({
+    sel: $('evaluador').value, otro: $('evaluador-otro').value.trim().toUpperCase(),
+  }));
+
   const opt = $('especie').selectedOptions[0];
   const reg = {
+    evaluador,
     zona: Number(zona),
     individuo: Number($('individuo').value),
     especie: $('especie').value,
@@ -190,6 +238,7 @@ async function prepararSiguiente(zona) {
   $('individuo').value = await DB.nextIndividuo(zona);
   await cargarEspecies();
   actualizarOrigen();
+  restaurarEvaluador();
 }
 
 // ---------- Lista de registros ----------
@@ -211,7 +260,7 @@ async function refrescarLista() {
         <strong>Z${r.zona} · I${r.individuo}</strong> — ${r.especie || '—'}
         <span class="tag">${ORIGENES[r.origen] || ''}</span>
         <div class="card-sub">
-          ${r.x ? `UTM ${r.x} / ${r.y} · ` : ''}${labelDe('sobrevivencia', r.sobrevivencia)}
+          ${r.evaluador ? r.evaluador + ' · ' : ''}${r.x ? `UTM ${r.x} / ${r.y} · ` : ''}${labelDe('sobrevivencia', r.sobrevivencia)}
         </div>
       </div>
       <div class="card-actions">
@@ -299,8 +348,11 @@ async function init() {
   setupTabs();
   setupModalEspecie();
   setupNetwork();
+  cargarEvaluadores();
   await cargarEspecies();
+  restaurarEvaluador();
 
+  $('evaluador').addEventListener('change', toggleEvaluadorOtro);
   $('especie').addEventListener('change', actualizarOrigen);
   $('btn-gps').addEventListener('click', capturarGPS);
   $('btn-foto').addEventListener('click', () => $('foto-input').click());
@@ -315,6 +367,7 @@ async function init() {
       document.querySelectorAll('.seg-btn.selected').forEach((b) => b.classList.remove('selected'));
       $('foto-preview').classList.add('hidden');
       $('gps-acc').textContent = ''; $('origen-label').textContent = '—';
+      restaurarEvaluador();
     }, 0);
   });
 

@@ -17,7 +17,7 @@ var HOJA = 'Censo';
 var CARPETA_FOTOS = 'Urbanya Monitoreo - Fotos';
 
 var COLUMNAS = [
-  'Zona', 'Individuo', 'Especie', 'Origen', 'Código GPS', 'Coordenada X', 'Coordenada Y',
+  'Evaluador', 'Zona', 'Individuo', 'Especie', 'Origen', 'Código GPS', 'Coordenada X', 'Coordenada Y',
   'Sobrevivencia', 'Vitalidad', 'Fitosanitario', 'Herbivoría', 'Poda', 'Corta',
   'Altura', 'DAP', 'Foto', 'Latitud', 'Longitud', 'Huso', 'Fecha registro', 'Sincronizado',
 ];
@@ -39,7 +39,7 @@ function doPost(e) {
         fotoUrl = guardarFoto_(carpeta, r);
       }
       hoja.appendRow([
-        r.zona, r.individuo, r.especie, r.origen, r.codigoGps, r.x, r.y,
+        r.evaluador, r.zona, r.individuo, r.especie, r.origen, r.codigoGps, r.x, r.y,
         r.sobrevivencia, r.vitalidad, r.fitosanitario, r.herbivoria, r.poda, r.corta,
         r.altura, r.dap, fotoUrl, r.lat, r.lon, r.huso, r.creado,
         new Date(),

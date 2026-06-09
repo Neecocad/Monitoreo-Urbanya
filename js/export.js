@@ -26,6 +26,7 @@ function download(blob, filename) {
 export function registroPlano(r) {
   return {
     id: r.id,
+    evaluador: r.evaluador || '',
     zona: Number(r.zona), individuo: Number(r.individuo),
     especie: r.especie || '', origen: L('origen', r.origen),
     codigoGps: r.codigoGps || '', x: r.x ?? '', y: r.y ?? '',
@@ -47,11 +48,11 @@ function ordenar(regs) {
 
 // Hoja Dasométrico (identificación + altura + DAP)
 function hojaDasometrico(regs) {
-  const head = ['Zona', 'Individuo', 'Especie', 'Origen', 'Código GPS', 'Coordenada X', 'Coordenada Y', 'Altura', 'DAP'];
+  const head = ['Evaluador', 'Zona', 'Individuo', 'Especie', 'Origen', 'Código GPS', 'Coordenada X', 'Coordenada Y', 'Altura', 'DAP'];
   const rows = [head];
   for (const r of regs) {
     rows.push([
-      Number(r.zona), Number(r.individuo), r.especie || '', L('origen', r.origen),
+      r.evaluador || '', Number(r.zona), Number(r.individuo), r.especie || '', L('origen', r.origen),
       r.codigoGps || '', r.x ?? '', r.y ?? '', L('altura', r.altura), L('dap', r.dap),
     ]);
   }
@@ -60,12 +61,12 @@ function hojaDasometrico(regs) {
 
 // Hoja Fitosanitario (identificación + dasométrico + estado sanitario)
 function hojaFitosanitario(regs) {
-  const head = ['Zona', 'Individuo', 'Especie', 'Origen', 'Código GPS', 'Coordenada X', 'Coordenada Y',
+  const head = ['Evaluador', 'Zona', 'Individuo', 'Especie', 'Origen', 'Código GPS', 'Coordenada X', 'Coordenada Y',
     'Sobrevivencia', 'Vitalidad', 'Fitosanitario', 'Herbivoría', 'Poda', 'Corta', 'Altura', 'DAP', 'Foto', 'Fecha registro'];
   const rows = [head];
   for (const r of regs) {
     rows.push([
-      Number(r.zona), Number(r.individuo), r.especie || '', L('origen', r.origen),
+      r.evaluador || '', Number(r.zona), Number(r.individuo), r.especie || '', L('origen', r.origen),
       r.codigoGps || '', r.x ?? '', r.y ?? '',
       L('sobrevivencia', r.sobrevivencia), L('vitalidad', r.vitalidad), L('fitosanitario', r.fitosanitario),
       L('herbivoria', r.herbivoria), L('poda', r.poda), L('corta', r.corta),
