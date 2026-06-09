@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#166534" />
+  <title>Monitoreo Urbanya</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>🌳 Monitoreo Urbanya</h1>
+    <span id="net-status" class="net-status">●</span>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-view="form">Censar</button>
+    <button class="tab" data-view="list">Registros <span id="count-badge" class="badge">0</span></button>
+    <button class="tab" data-view="export">Exportar</button>
+  </nav>
+
+  <main>
+    <!-- ===== FORMULARIO ===== -->
+    <section id="view-form" class="view active">
+      <form id="censo-form" autocomplete="off">
+
+        <fieldset>
+          <legend>Identificación</legend>
+          <div class="grid-2">
+            <label>Zona
+              <input type="number" id="zona" min="1" inputmode="numeric" required />
+            </label>
+            <label>Individuo
+              <input type="number" id="individuo" min="1" inputmode="numeric" required />
+            </label>
+          </div>
+
+          <label>Especie
+            <div class="row">
+              <select id="especie" required></select>
+              <button type="button" id="add-especie" class="btn-mini" title="Agregar especie">＋</button>
+            </div>
+          </label>
+          <p class="hint">Origen: <strong id="origen-label">—</strong></p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Ubicación</legend>
+          <div class="row gps-row">
+            <button type="button" id="btn-gps" class="btn-gps">📍 Capturar GPS</button>
+            <span id="gps-acc" class="hint"></span>
+          </div>
+          <div class="grid-2">
+            <label>Coordenada X
+              <input type="number" id="x" inputmode="numeric" />
+            </label>
+            <label>Coordenada Y
+              <input type="number" id="y" inputmode="numeric" />
+            </label>
+          </div>
+          <label>Código GPS
+            <input type="text" id="codigoGps" placeholder="N° del navegador GPS (opcional)" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Dasométrico</legend>
+          <label>Altura</label>
+          <div class="segmented" id="seg-altura"></div>
+          <label>DAP</label>
+          <div class="segmented" id="seg-dap"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Fitosanitario</legend>
+          <label>Sobrevivencia</label>
+          <div class="segmented" id="seg-sobrevivencia"></div>
+          <label>Vitalidad</label>
+          <div class="segmented" id="seg-vitalidad"></div>
+          <label>Estado fitosanitario</label>
+          <div class="segmented" id="seg-fitosanitario"></div>
+          <label>Herbivoría</label>
+          <div class="segmented" id="seg-herbivoria"></div>
+          <label>Poda</label>
+          <div class="segmented" id="seg-poda"></div>
+          <label>Corta</label>
+          <div class="segmented" id="seg-corta"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Fotografía</legend>
+          <input type="file" id="foto-input" accept="image/*" capture="environment" hidden />
+          <button type="button" id="btn-foto" class="btn-foto">📷 Tomar fotografía</button>
+          <div id="foto-preview" class="foto-preview hidden">
+            <img id="foto-img" alt="Foto del árbol" />
+            <button type="button" id="btn-foto-del" class="btn-mini danger">🗑</button>
+          </div>
+          <p class="hint">La foto incluye fecha/hora, coordenadas e individuo (geo-sello).</p>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary">💾 Guardar individuo</button>
+          <button type="reset" class="btn-ghost" id="btn-reset">Limpiar</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== REGISTROS ===== -->
+    <section id="view-list" class="view">
+      <div id="list-container" class="list"></div>
+      <p id="list-empty" class="empty">Aún no hay individuos registrados.</p>
+    </section>
+
+    <!-- ===== EXPORTAR ===== -->
+    <section id="view-export" class="view">
+      <p class="hint">Descarga los datos guardados en este dispositivo.</p>
+      <button type="button" id="exp-xlsx" class="btn-primary">📊 Excel (dasométrico + fitosanitario)</button>
+      <button type="button" id="exp-csv" class="btn-ghost">📄 CSV</button>
+      <button type="button" id="exp-json" class="btn-ghost">🗄 Respaldo JSON (con fotos)</button>
+      <hr />
+      <button type="button" id="btn-sync" class="btn-ghost" disabled>☁️ Sincronizar en línea (próximamente)</button>
+      <p id="stats" class="hint"></p>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Modal: agregar especie -->
+  <div id="modal-especie" class="modal hidden">
+    <div class="modal-card">
+      <h3>Agregar especie</h3>
+      <label>Nombre común
+        <input type="text" id="ne-nombre" />
+      </label>
+      <label>Nombre científico (opcional)
+        <input type="text" id="ne-cientifico" />
+      </label>
+      <label>Origen
+        <select id="ne-origen">
+          <option value="nativa">Nativa</option>
+          <option value="exotica">Exótica</option>
+          <option value="desconocido">Desconocido</option>
+        </select>
+      </label>
+      <div class="actions">
+        <button type="button" id="ne-guardar" class="btn-primary">Agregar</button>
+        <button type="button" id="ne-cancelar" class="btn-ghost">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
