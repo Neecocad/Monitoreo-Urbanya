@@ -1,5 +1,5 @@
 // Service Worker — cachea la app para uso 100% offline.
-const CACHE = 'urbanya-v5';
+const CACHE = 'urbanya-v6';
 const ASSETS = [
   './',
   './index.html',

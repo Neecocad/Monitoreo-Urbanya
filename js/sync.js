@@ -1,4 +1,6 @@
 // Sincronización de registros con el Web App de Google Sheets.
+// Formato compatible con el patrón de Santiago Solar: { record_id, rows: [...] }
+// enviado como `data=` (application/x-www-form-urlencoded) para evitar CORS.
 import * as DB from './db.js';
 import { registroPlano } from './export.js';
 
@@ -12,7 +14,36 @@ export function setUrl(url) {
   localStorage.setItem(URL_KEY, url.trim());
 }
 
-// Envía los registros aún no sincronizados al Web App y los marca como sincronizados.
+// Construye la fila (snake_case) que espera la planilla.
+function fila(reg) {
+  const p = registroPlano(reg);
+  return {
+    fecha: p.creado,
+    evaluador: p.evaluador,
+    zona: p.zona,
+    n_individuo: p.individuo,
+    especie: p.especie,
+    origen: p.origen,
+    codigo_gps: p.codigoGps,
+    utm_este: p.x,
+    utm_norte: p.y,
+    huso: p.huso,
+    datum: 'WGS84',
+    lat: p.lat,
+    lon: p.lon,
+    sobrevivencia: p.sobrevivencia,
+    vitalidad: p.vitalidad,
+    estado_fitosanitario: p.fitosanitario,
+    herbivoria: p.herbivoria,
+    poda: p.poda,
+    corta: p.corta,
+    altura: p.altura,
+    dap: p.dap,
+    foto: p.foto, // base64; el servidor la sube a Drive y deja la URL en foto_url
+  };
+}
+
+// Envía los registros no sincronizados; uno por POST (record_id idempotente).
 export async function sincronizar(onProgress) {
   const url = getUrl();
   if (!url) throw new Error('Configura primero la URL de sincronización.');
@@ -22,17 +53,16 @@ export async function sincronizar(onProgress) {
   if (!pendientes.length) return { enviados: 0, total: 0 };
 
   let enviados = 0;
-  // Se envían de a uno para que las fotos no excedan el límite de tamaño.
   for (const reg of pendientes) {
-    const payload = { registros: [registroPlano(reg)] };
-    // text/plain evita el preflight CORS con Apps Script.
+    const payload = { record_id: `Z${reg.zona}_I${reg.individuo}`, rows: [fila(reg)] };
+    const body = 'data=' + encodeURIComponent(JSON.stringify(payload));
     const resp = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
+      body,
     });
     const data = await resp.json();
-    if (!data.ok) throw new Error(data.error || 'Error del servidor');
+    if (data.status !== 'ok') throw new Error(data.mensaje || 'Error del servidor');
     reg.sincronizado = 1;
     await DB.updateRegistro(reg);
     enviados++;
