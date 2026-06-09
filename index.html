@@ -121,7 +121,11 @@
       <button type="button" id="exp-csv" class="btn-ghost">📄 CSV</button>
       <button type="button" id="exp-json" class="btn-ghost">🗄 Respaldo JSON (con fotos)</button>
       <hr />
-      <button type="button" id="btn-sync" class="btn-ghost" disabled>☁️ Sincronizar en línea (próximamente)</button>
+      <label>URL de sincronización (Google Sheets / Apps Script)
+        <input type="url" id="sync-url" placeholder="https://script.google.com/.../exec" />
+      </label>
+      <button type="button" id="btn-sync" class="btn-primary">☁️ Sincronizar en línea</button>
+      <p id="sync-info" class="hint"></p>
       <p id="stats" class="hint"></p>
     </section>
   </main>

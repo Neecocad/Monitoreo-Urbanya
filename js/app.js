@@ -2,6 +2,7 @@
 import * as DB from './db.js';
 import { latLonToUTM } from './utm.js';
 import * as XP from './export.js';
+import * as SYNC from './sync.js';
 import {
   ESPECIES_BASE, ALTURA, DAP, SOBREVIVENCIA, VITALIDAD,
   FITOSANITARIO, HERBIVORIA, PODA, CORTA, ORIGENES,
@@ -320,6 +321,28 @@ async function init() {
   $('exp-xlsx').addEventListener('click', async () => XP.exportarExcel(await DB.getRegistros()));
   $('exp-csv').addEventListener('click', async () => XP.exportarCSV(await DB.getRegistros()));
   $('exp-json').addEventListener('click', async () => XP.exportarRespaldo(await DB.getRegistros()));
+
+  // Sincronización en línea
+  $('sync-url').value = SYNC.getUrl();
+  $('sync-url').addEventListener('change', (e) => { SYNC.setUrl(e.target.value); toast('URL guardada'); });
+  $('btn-sync').addEventListener('click', async () => {
+    const btn = $('btn-sync');
+    btn.disabled = true;
+    $('sync-info').textContent = 'Sincronizando…';
+    try {
+      const r = await SYNC.sincronizar((n, t) => { $('sync-info').textContent = `Enviando ${n}/${t}…`; });
+      $('sync-info').textContent = r.enviados
+        ? `✅ ${r.enviados} registro(s) sincronizado(s).`
+        : 'Todo al día, no hay pendientes.';
+      toast('Sincronización completa');
+      await refrescarLista();
+    } catch (err) {
+      $('sync-info').textContent = '⚠️ ' + err.message;
+      toast('Error al sincronizar');
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
   await refrescarLista();
 

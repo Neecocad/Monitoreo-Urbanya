@@ -22,6 +22,23 @@ function download(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
+// Registro con valores etiquetados (legibles), usado por sincronización.
+export function registroPlano(r) {
+  return {
+    id: r.id,
+    zona: Number(r.zona), individuo: Number(r.individuo),
+    especie: r.especie || '', origen: L('origen', r.origen),
+    codigoGps: r.codigoGps || '', x: r.x ?? '', y: r.y ?? '',
+    sobrevivencia: L('sobrevivencia', r.sobrevivencia), vitalidad: L('vitalidad', r.vitalidad),
+    fitosanitario: L('fitosanitario', r.fitosanitario), herbivoria: L('herbivoria', r.herbivoria),
+    poda: L('poda', r.poda), corta: L('corta', r.corta),
+    altura: L('altura', r.altura), dap: L('dap', r.dap),
+    lat: r.lat ?? '', lon: r.lon ?? '', huso: r.huso ?? '',
+    creado: r.creado ? r.creado.slice(0, 19).replace('T', ' ') : '',
+    foto: r.foto || '',
+  };
+}
+
 function ordenar(regs) {
   return [...regs].sort(
     (a, b) => (Number(a.zona) - Number(b.zona)) || (Number(a.individuo) - Number(b.individuo))
