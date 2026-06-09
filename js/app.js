@@ -9,6 +9,7 @@ import {
 } from './catalog.js';
 
 const EVAL_KEY = 'urbanya-evaluador';
+const VERSION = 'v8';
 
 const $ = (id) => document.getElementById(id);
 const estado = { especies: [], foto: null, gps: null, segValues: {} };
@@ -348,6 +349,7 @@ async function init() {
   setupTabs();
   setupModalEspecie();
   setupNetwork();
+  $('app-version').textContent = 'Versión ' + VERSION;
   cargarEvaluadores();
   await cargarEspecies();
   restaurarEvaluador();
