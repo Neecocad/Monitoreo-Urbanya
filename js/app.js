@@ -159,7 +159,7 @@ function tomarFoto(file) {
       const esp = $('especie').value || '';
       lineas.push(`Zona ${z} · Individuo ${ind}${esp ? ' · ' + esp : ''}`);
       const ev = valorEvaluador();
-      if (ev) lineas.push(`Evaluador(a): ${ev}`);
+      if (ev) lineas.push(`Evaluadora/Evaluador: ${ev}`);
       if (estado.gps) {
         lineas.push(`UTM ${estado.gps.huso}: ${estado.gps.x} E, ${estado.gps.y} N`);
         lineas.push(`Lat ${estado.gps.lat.toFixed(6)}, Lon ${estado.gps.lon.toFixed(6)}`);
@@ -191,7 +191,7 @@ function tomarFoto(file) {
 async function guardar(e) {
   e.preventDefault();
   const evaluador = valorEvaluador();
-  if (!evaluador) { toast('Indica el/la evaluador(a)'); return; }
+  if (!evaluador) { toast('Indica la evaluadora / evaluador'); return; }
   const zona = $('zona').value;
   if (!zona) { toast('Indica la zona'); return; }
   if (!$('especie').value) { toast('Selecciona la especie'); return; }
