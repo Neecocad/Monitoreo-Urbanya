@@ -6,8 +6,11 @@ import { registroPlano } from './export.js';
 
 const URL_KEY = 'urbanya-sync-url';
 
+// URL del Web App por defecto (se puede sobreescribir en la app).
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbzFHRSLG_sz0luNEEoF4GOw73gyYxn9fb-BIxWElkEPbzZYbfImZZkt63NQCVFu0LPVSQ/exec';
+
 export function getUrl() {
-  return localStorage.getItem(URL_KEY) || '';
+  return localStorage.getItem(URL_KEY) || DEFAULT_URL;
 }
 
 export function setUrl(url) {
