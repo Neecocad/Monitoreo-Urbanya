@@ -12,7 +12,7 @@
  * 4. Copia la URL .../exec y pégala en el PWA (Exportar → URL de sincronización).
  */
 
-const SPREADSHEET_ID = 'PEGA_AQUI_EL_ID_DE_TU_PLANILLA';
+const SPREADSHEET_ID = '1I-qHtKN_27Xnx5-c-Whgex9dLWZoteRdTWSdCtB0Yk8';
 const HOJA = 'Datos';
 const PROYECTO = 'Urbanya';
 const CARPETA_FOTOS = 'Urbanya Monitoreo - Fotos';
