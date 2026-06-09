@@ -1,5 +1,5 @@
 // Service Worker — cachea la app para uso 100% offline.
-const CACHE = 'urbanya-v4';
+const CACHE = 'urbanya-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -29,19 +29,21 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Cache-first: ideal para terreno sin señal.
+// Red primero: con internet siempre baja la última versión y refresca la caché;
+// sin señal (terreno) usa lo último guardado. Evita quedar pegado en versiones viejas.
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  if (!e.request.url.startsWith(self.location.origin)) return; // recursos externos: sin intervenir
+
   e.respondWith(
-    caches.match(e.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(e.request).then((resp) => {
-        if (resp.ok && e.request.url.startsWith(self.location.origin)) {
+    fetch(e.request)
+      .then((resp) => {
+        if (resp && resp.ok) {
           const copy = resp.clone();
           caches.open(CACHE).then((c) => c.put(e.request, copy));
         }
         return resp;
-      }).catch(() => cached);
-    })
+      })
+      .catch(() => caches.match(e.request).then((cached) => cached || caches.match('./index.html')))
   );
 });
